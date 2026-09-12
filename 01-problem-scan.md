@@ -1,43 +1,44 @@
 # 01 Problem Scan - Vin Smart Future
 
-## Huong chon de tai
+## Hướng chọn đề tài
 
-Nhom minh chon huong: **Xanh SM ho tro dieu phoi vien xu ly su co xe dien sap het pin**.
+Nhóm mình chọn hướng: **Xanh SM hỗ trợ điều phối viên xử lý sự cố xe điện sắp hết pin**.
 
-Ly do chon huong nay:
+Lý do chọn hướng này:
 
-- Xanh SM van hanh taxi va xe may dien, nen pin va tram sac la mot phan rat gan voi cong viec hang ngay.
-- VinFast da co he thong tram sac, nhung khi gap tinh huong gap thi dieu phoi vien van phai quyet dinh nhanh.
-- De tai nay cung khop voi file code mau: neu pin duoi 5%, AI khong duoc goi y tram sac qua xa va nen de xuat xe sac pin di dong.
+- Xanh SM là dịch vụ gọi xe thuần điện ở Việt Nam, nên pin, trạm sạc và điều phối xe là vấn đề rất gần với vận hành hằng ngày.
+- VinFast có hệ thống trạm sạc rộng ở Việt Nam, nhưng trong tình huống gấp thì điều phối viên vẫn phải quyết định nhanh.
+- Đề tài này khớp với file code mẫu: nếu pin dưới 5%, AI không được gợi ý trạm sạc quá xa và nên đề xuất xe sạc pin di động.
 
-Nguon da xem:
+Nguồn đã xem:
 
-- Gioi thieu Xanh SM: https://xanhsm.taxi/gioi-thieu/
-- Tim kiem showroom va tram sac VinFast: https://vinfastauto.com/vn_vi/tim-kiem-showroom-tram-sac
-- Dich vu pin va sac xe dien VinFast: https://vinfastauto.com/vn_vi/dich-vu-pin-oto-dien
+- Xanh SM giới thiệu dịch vụ xe điện: https://xanhsm.taxi/gioi-thieu/
+- VinFast tìm showroom và trạm sạc: https://vinfastauto.com/vn_vi/tim-kiem-showroom-tram-sac
+- VinFast dịch vụ pin và trạm sạc: https://vinfastauto.com/vn_vi/dich-vu-pin-oto-dien
+- Google AI gợi ý dùng prompt có role, context, constraint và output format rõ ràng: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies
 
 ---
 
 ## Phase 1 - SCAN
 
-| # | Cong ty thanh vien | Lens | Mo ta ngan bai toan |
+| # | Công ty thành viên | Lens | Mô tả ngắn bài toán |
 |---|---|---|---|
-| 1 | Xanh SM | Ton thoi gian | Dieu phoi vien phai xu ly thu cong su co xe gan het pin: hoi tai xe, xem vi tri xe, tim tram sac gan nhat, roi soan huong dan. |
-| 2 | Xanh SM | Pain tu nguoi khac | Tai xe co the khong biet tram sac nao tot nhat khi pin qua thap, nhat la gio cao diem hoac dang co khach cho. |
-| 3 | VinFast | Lap lai | Nhan vien phai doi chieu nhieu phien sac, log tram sac va du lieu thanh toan de tim loi tinh phi hoac thieu du lieu. |
-| 4 | Vinhomes | AI co the tot hon | Phan anh cua cu dan tren app co the bi phan loai cham, lam cac van de gap nhu mat nuoc, hong thang may bi xu ly tre. |
-| 5 | Vinmec | Ton thoi gian | Bac si mat nhieu thoi gian viet tom tat xuat vien vi phai doc ghi chu dieu tri, ket qua xet nghiem va lich su thuoc. |
-| 6 | Vinpearl | Pain tu nguoi khac | Quan ly khach san phai doc nhieu review tu nhieu nen tang de tim cac phan nan lap lai nhu phong ban, check-in cham, nhan vien thai do kem. |
+| 1 | Xanh SM | Tốn thời gian | Điều phối viên phải xử lý thủ công sự cố xe gần hết pin: hỏi tài xế, xem vị trí xe, tìm trạm sạc gần nhất, rồi soạn hướng dẫn. |
+| 2 | Xanh SM | Pain từ người khác | Tài xế có thể không biết trạm sạc nào tốt nhất khi pin quá thấp, nhất là giờ cao điểm hoặc đang có khách chờ. |
+| 3 | VinFast | Lặp lại | Nhân viên phải đối chiếu nhiều phiên sạc, log trạm sạc và dữ liệu thanh toán để tìm lỗi tính phí hoặc thiếu dữ liệu. |
+| 4 | Vinhomes | AI có thể tốt hơn | Phản ánh của cư dân trên app có thể bị phân loại chậm, làm các vấn đề gấp như mất nước, hỏng thang máy bị xử lý trễ. |
+| 5 | Vinmec | Tốn thời gian | Bác sĩ mất nhiều thời gian viết tóm tắt xuất viện vì phải đọc ghi chú điều trị, kết quả xét nghiệm và lịch sử thuốc. |
+| 6 | Vinpearl | Pain từ người khác | Quản lý khách sạn phải đọc nhiều review từ nhiều nền tảng để tìm các phàn nàn lặp lại như phòng bẩn, check-in chậm, nhân viên thái độ kém. |
 
 ---
 
 ## Phase 2 - QUICK-ASSESS
 
-Nhom chon 3 bai toan tiem nang nhat:
+Nhóm chọn 3 bài toán tiềm năng nhất:
 
-1. Xanh SM ho tro dieu phoi vien xu ly xe sap het pin
-2. Vinhomes phan loai va dieu huong phan anh cu dan
-3. Vinmec ho tro viet tom tat xuat vien
+1. Xanh SM hỗ trợ điều phối viên xử lý xe sắp hết pin
+2. Vinhomes phân loại và điều hướng phản ánh cư dân
+3. Vinmec hỗ trợ viết tóm tắt xuất viện
 
 ---
 
@@ -46,46 +47,46 @@ Nhom chon 3 bai toan tiem nang nhat:
 ```text
 QUICK PROBLEM CARD #1
 
-Bai toan:
-Dieu phoi vien Xanh SM mat qua nhieu thoi gian khi xu ly su co xe dien sap het pin.
+Bài toán:
+Điều phối viên Xanh SM mất quá nhiều thời gian khi xử lý sự cố xe điện sắp hết pin.
 
-Cong ty thanh vien:
+Công ty thành viên:
 [x] Xanh SM
 
-Ai dang dau?
-Nguoi chinh: Dieu phoi vien.
-Nguoi bi anh huong: Tai xe va khach hang.
+Ai đang đau?
+Người chính: Điều phối viên.
+Người bị ảnh hưởng: Tài xế và khách hàng.
 
-Workflow thu cong hien tai:
-1. Tai xe goi hoac nhan tin bao xe sap het pin.
-2. Dieu phoi vien kiem tra vi tri xe va muc pin hien tai.
-3. Dieu phoi vien tim cac tram sac VinFast gan do.
-4. Dieu phoi vien kiem tra tram nao du gan va phu hop.
-5. Dieu phoi vien viet huong dan cho tai xe hoac goi ho tro cuu ho.
+Workflow thủ công hiện tại:
+1. Tài xế gọi hoặc nhắn tin báo xe sắp hết pin.
+2. Điều phối viên kiểm tra vị trí xe và mức pin hiện tại.
+3. Điều phối viên tìm các trạm sạc VinFast gần đó.
+4. Điều phối viên kiểm tra trạm nào đủ gần và phù hợp.
+5. Điều phối viên viết hướng dẫn cho tài xế hoặc gọi hỗ trợ cứu hộ.
 
-Buoc ton thoi gian nhat:
-Buoc 3 va 4, khoang 8-12 phut moi ca.
+Bước tốn thời gian nhất:
+Bước 3 và 4, khoảng 8-12 phút mỗi ca.
 
-AI co the ho tro o dau?
-AI co the doc tin nhan cua tai xe, muc pin, vi tri xe va danh sach tram sac.
-Sau do AI tao ban nhap goi y an toan cho dieu phoi vien.
+AI có thể hỗ trợ ở đâu?
+AI có thể đọc tin nhắn của tài xế, mức pin, vị trí xe và danh sách trạm sạc.
+Sau đó AI tạo bản nháp gợi ý an toàn cho điều phối viên.
 
-Metric thanh cong:
-Giam thoi gian xu ly tu khoang 15 phut xuong duoi 3 phut moi ca.
+Metric thành công:
+Giảm thời gian xử lý từ khoảng 15 phút xuống dưới 3 phút mỗi ca.
 
 Quick Architecture:
 [ ] No AI  [ ] Rule  [x] LLM  [ ] Agent
 ```
 
-Vi sao chon bai nay:
+Vì sao chọn bài này:
 
-- Bai toan nay gap va co anh huong truc tiep den van hanh.
-- AI khong can tu quyet dinh cuoi cung. AI chi viet ban nhap, dieu phoi vien van duyet.
+- Bài toán này gấp và có ảnh hưởng trực tiếp đến vận hành.
+- AI không cần tự quyết định cuối cùng. AI chỉ viết bản nháp, điều phối viên vẫn duyệt.
 
-Vi sao khong chi dung rule-based:
+Vì sao không chỉ dùng rule-based:
 
-- Rule co the kiem tra muc pin va khoang cach, nhung tin nhan cua tai xe thuong khong gon gang.
-- LLM huu ich vi co the hieu tieng Viet tu nhien va viet huong dan de doc cho tai xe.
+- Rule có thể kiểm tra mức pin và khoảng cách, nhưng tin nhắn của tài xế thường không gọn gàng.
+- LLM hữu ích vì có thể hiểu tiếng Việt tự nhiên và viết hướng dẫn dễ đọc cho tài xế.
 
 ---
 
@@ -94,45 +95,45 @@ Vi sao khong chi dung rule-based:
 ```text
 QUICK PROBLEM CARD #2
 
-Bai toan:
-Phan anh cua cu dan Vinhomes khong phai luc nao cung duoc chuyen den dung bo phan mot cach nhanh.
+Bài toán:
+Phản ánh của cư dân Vinhomes không phải lúc nào cũng được chuyển đến đúng bộ phận một cách nhanh.
 
-Cong ty thanh vien:
+Công ty thành viên:
 [x] Vinhomes
 
-Ai dang dau?
-Nguoi chinh: Nhan vien ban quan ly toa nha.
-Nguoi bi anh huong: Cu dan va doi bao tri.
+Ai đang đau?
+Người chính: Nhân viên ban quản lý tòa nhà.
+Người bị ảnh hưởng: Cư dân và đội bảo trì.
 
-Workflow thu cong hien tai:
-1. Cu dan gui phan anh tren app.
-2. Nhan vien doc noi dung thu cong.
-3. Nhan vien phan loai van de, vi du thang may, nuoc, tieng on, bai xe, an ninh.
-4. Nhan vien chuyen den doi phu trach.
-5. Nhan vien viet phan hoi cho cu dan.
+Workflow thủ công hiện tại:
+1. Cư dân gửi phản ánh trên app.
+2. Nhân viên đọc nội dung thủ công.
+3. Nhân viên phân loại vấn đề, ví dụ thang máy, nước, tiếng ồn, bãi xe, an ninh.
+4. Nhân viên chuyển đến đội phụ trách.
+5. Nhân viên viết phản hồi cho cư dân.
 
-Buoc ton thoi gian nhat:
-Buoc 2 va 3, khoang 5-10 phut moi ticket.
+Bước tốn thời gian nhất:
+Bước 2 và 3, khoảng 5-10 phút mỗi ticket.
 
-AI co the ho tro o dau?
-AI co the phan loai phan anh, nhan dien muc do khan cap va draft cau tra loi ngan.
+AI có thể hỗ trợ ở đâu?
+AI có thể phân loại phản ánh, nhận diện mức độ khẩn cấp và draft câu trả lời ngắn.
 
-Metric thanh cong:
-Dieu huong dung 85% phan anh thong thuong den dung doi trong duoi 30 giay.
+Metric thành công:
+Điều hướng đúng 85% phản ánh thông thường đến đúng đội trong dưới 30 giây.
 
 Quick Architecture:
 [ ] No AI  [ ] Rule  [x] LLM  [ ] Agent
 ```
 
-Vi sao chon bai nay:
+Vì sao chọn bài này:
 
-- Co nhieu tin nhan lap lai, nen co kha nang tiet kiem thoi gian.
-- Phan loai van ban va viet cau tra loi la viec LLM lam kha tot.
+- Có nhiều tin nhắn lặp lại, nên có khả năng tiết kiệm thời gian.
+- Phân loại văn bản và viết câu trả lời là việc LLM làm khá tốt.
 
-Vi sao khong chon lam de tai cuoi:
+Vì sao không chọn làm đề tài cuối:
 
-- Mot so phan anh co the lien quan den phi, tranh chap hoac an toan.
-- Can ranh gioi chinh sach ro hon truoc khi cho AI goi y cau tra loi.
+- Một số phản ánh có thể liên quan đến phí, tranh chấp hoặc an toàn.
+- Cần ranh giới chính sách rõ hơn trước khi cho AI gợi ý câu trả lời.
 
 ---
 
@@ -141,61 +142,61 @@ Vi sao khong chon lam de tai cuoi:
 ```text
 QUICK PROBLEM CARD #3
 
-Bai toan:
-Bac si Vinmec mat qua nhieu thoi gian de viet tom tat xuat vien sau dieu tri.
+Bài toán:
+Bác sĩ Vinmec mất quá nhiều thời gian để viết tóm tắt xuất viện sau điều trị.
 
-Cong ty thanh vien:
+Công ty thành viên:
 [x] Vinmec
 
-Ai dang dau?
-Nguoi chinh: Bac si.
-Nguoi bi anh huong: Dieu duong, benh nhan va bo phan hanh chinh benh vien.
+Ai đang đau?
+Người chính: Bác sĩ.
+Người bị ảnh hưởng: Điều dưỡng, bệnh nhân và bộ phận hành chính bệnh viện.
 
-Workflow thu cong hien tai:
-1. Bac si doc chan doan va ghi chu dieu tri.
-2. Bac si kiem tra ket qua xet nghiem va lich su dung thuoc.
-3. Bac si viet tom tat xuat vien thu cong.
-4. Bac si giai thich buoc tiep theo cho benh nhan.
-5. Bo phan hanh chinh luu tai lieu vao he thong.
+Workflow thủ công hiện tại:
+1. Bác sĩ đọc chẩn đoán và ghi chú điều trị.
+2. Bác sĩ kiểm tra kết quả xét nghiệm và lịch sử dùng thuốc.
+3. Bác sĩ viết tóm tắt xuất viện thủ công.
+4. Bác sĩ giải thích bước tiếp theo cho bệnh nhân.
+5. Bộ phận hành chính lưu tài liệu vào hệ thống.
 
-Buoc ton thoi gian nhat:
-Buoc 1 den 3, khoang 20-30 phut moi benh nhan.
+Bước tốn thời gian nhất:
+Bước 1 đến 3, khoảng 20-30 phút mỗi bệnh nhân.
 
-AI co the ho tro o dau?
-AI co the tao ban nhap tom tat xuat vien tu ghi chu va ket qua co cau truc.
-Bac si bat buoc phai doc lai va duyet truoc khi su dung.
+AI có thể hỗ trợ ở đâu?
+AI có thể tạo bản nháp tóm tắt xuất viện từ ghi chú và kết quả có cấu trúc.
+Bác sĩ bắt buộc phải đọc lại và duyệt trước khi sử dụng.
 
-Metric thanh cong:
-Giam thoi gian viet ban nhap dau tien tu 25 phut xuong duoi 8 phut.
+Metric thành công:
+Giảm thời gian viết bản nháp đầu tiên từ 25 phút xuống dưới 8 phút.
 
 Quick Architecture:
 [ ] No AI  [ ] Rule  [x] LLM  [ ] Agent
 ```
 
-Vi sao chon bai nay:
+Vì sao chọn bài này:
 
-- Co kha nang tiet kiem thoi gian ro.
-- Dau vao va dau ra deu nhieu van ban, nen phu hop voi LLM.
+- Có khả năng tiết kiệm thời gian rõ.
+- Đầu vào và đầu ra đều nhiều văn bản, nên phù hợp với LLM.
 
-Vi sao khong chon lam de tai cuoi:
+Vì sao không chọn làm đề tài cuối:
 
-- Noi dung y te co rui ro cao.
-- Neu tom tat sai co the anh huong den an toan benh nhan, nen can kiem tra chat che va bac si phe duyet.
+- Nội dung y tế có rủi ro cao.
+- Nếu tóm tắt sai có thể ảnh hưởng đến an toàn bệnh nhân, nên cần kiểm tra chặt chẽ và bác sĩ phê duyệt.
 
 ---
 
-## Lua chon cuoi cung
+## Lựa chọn cuối cùng
 
-De tai nhom chon la:
+Đề tài nhóm chọn là:
 
-> **Xanh SM ho tro dieu phoi vien xu ly xe dien sap het pin**
+> **Xanh SM hỗ trợ điều phối viên xử lý xe điện sắp hết pin**
 
-Nhom chon de tai nay vi no cu the, gan voi van hanh, va co the test nhanh trong lab 30 phut. Rui ro cung co the kiem soat vi AI chi viet ban nhap. Dieu phoi vien van la nguoi duyet hanh dong cuoi cung.
+Nhóm chọn đề tài này vì nó cụ thể, gần với vận hành, và có thể test nhanh trong lab 30 phút. Rủi ro cũng có thể kiểm soát vì AI chỉ viết bản nháp. Điều phối viên vẫn là người duyệt hành động cuối cùng.
 
-Metric chinh:
+Metric chính:
 
-> Giam thoi gian xu ly tu khoang 15 phut xuong duoi 3 phut cho moi su co xe sap het pin.
+> Giảm thời gian xử lý từ khoảng 15 phút xuống dưới 3 phút cho mỗi sự cố xe sắp hết pin.
 
-Ranh gioi chinh:
+Ranh giới chính:
 
-> AI luon phai xuat ket qua co tag `[DRAFT_ONLY]`. Neu pin duoi 5%, AI khong duoc goi y tram sac xa hon 5km. AI nen tra ve hanh dong `dispatch_mobile_charger`.
+> AI luôn phải xuất kết quả có tag `[DRAFT_ONLY]`. Nếu pin dưới 5%, AI không được gợi ý trạm sạc xa hơn 5km. AI nên trả về hành động `dispatch_mobile_charger`.
