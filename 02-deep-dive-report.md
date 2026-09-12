@@ -80,7 +80,9 @@ Sơ đồ trực quan: [`04-workflow-diagram.png`](04-workflow-diagram.png)
 | **LLM Feature** | ✅ **Giải cả hai.** Phân loại + trích slot + soạn bản nháp là đúng thế mạnh của LLM. Quy trình có 5 bước cố định, không cần tự hoạch định. | Trung bình — kiểm soát được bằng HITL bắt buộc + lớp guard tất định | ✅ **CHỌN** |
 | **Agentic Loop** | ✅ Giải được, nhưng dư thừa năng lực. | **Cao.** Agent tự trị được quyền gọi API hành động (điều xe cứu hộ, hoàn tiền) trong bối cảnh sai một lần là tài xế mắc kẹt giữa đường ban đêm. Thêm vào đó: độ trễ nhiều vòng lặp mâu thuẫn với SLA 5 phút, chi phí token cao, và **chưa có bộ eval để đo agent**. | ❌ Không chọn ở giai đoạn này. Xem xét lại sau khi pilot LLM Feature chạy ổn định 2 quý. |
 
-➡️ **Quyết định: LLM Feature** (Gemini 2.5 Flash) — nhanh, rẻ, đủ mạnh cho phân loại và soạn thảo tiếng Việt, và quan trọng nhất là **giữ con người ở đúng điểm ra quyết định**.
+➡️ **Quyết định: LLM Feature** — chạy trên **Gemini 3.5 Flash-Lite** (mặc định), tự động lùi về `gemini-3.8-flash` → `gemini-flash-latest` → `gemini-2.5-flash` nếu model ưu tiên chưa khả dụng trên API key. Nhanh, rẻ, đủ mạnh cho phân loại và soạn thảo tiếng Việt, và quan trọng nhất là **giữ con người ở đúng điểm ra quyết định**.
+
+> **Vì sao chọn bậc Flash-Lite chứ không phải model mạnh nhất:** ranh giới an toàn ở đây **không dựa vào độ thông minh của model** mà dựa vào lớp guard tất định ở §3.3. Model chỉ cần đủ tốt để phân loại và diễn đạt tiếng Việt trôi chảy. Chọn bậc rẻ nhất đạt yêu cầu giúp chi phí vận hành 180 lượt/đêm gần như không đáng kể, và nếu chất lượng phân loại không đạt ngưỡng M3 ≥ 92% thì việc nâng lên `gemini-3.8-flash` chỉ là sửa **một dòng trong file `.env`**, không phải sửa code.
 
 ### Future-State Flow
 
@@ -165,7 +167,7 @@ Bài toán này đạt **GO** vì ba lý do đứng vững được trước ph�
 
 2. **Rủi ro được kiểm soát bằng kỹ thuật, không bằng lời hứa.** Ranh giới nguy hiểm nhất (chỉ tài xế pin < 5% đi xa) đã được viết thành assertion chạy được và đứng vững qua 4 hướng tấn công, trong đó có cả prompt injection và mạo danh thẩm quyền. Con người vẫn nắm điểm ra quyết định cuối.
 
-3. **Chi phí thử sai thấp.** Gemini 2.5 Flash rẻ và nhanh; quy trình cũ vẫn chạy song song làm fallback. Nếu pilot thất bại, tổn thất là 6 tuần công sức — không phải một hệ thống đã thay thế quy trình vận hành.
+3. **Chi phí thử sai thấp.** Model bậc Flash-Lite rẻ và nhanh, lại đổi được bằng một dòng cấu hình; quy trình cũ vẫn chạy song song làm fallback. Nếu pilot thất bại, tổn thất là 6 tuần công sức — không phải một hệ thống đã thay thế quy trình vận hành.
 
 **Nhưng GO này có điều kiện.** Ba ràng buộc bắt buộc trước khi bật pilot:
 

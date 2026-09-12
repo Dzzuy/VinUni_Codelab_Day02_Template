@@ -2,7 +2,7 @@
 
 > **Lab 02 — AI Product Scoping (Vin Smart Future)**
 > **Học viên:** Nguyễn Văn Thân
-> **Công cụ AI đã dùng:** Claude (Anthropic) làm thought-partner chính cho scoping và viết code; Gemini 2.5 Flash làm đối tượng kiểm thử ranh giới trong [`starter-code/prompt_prototype.py`](starter-code/prompt_prototype.py).
+> **Công cụ AI đã dùng:** Claude (Anthropic) làm thought-partner chính cho scoping và viết code; Gemini (mặc định `gemini-3.5-flash-lite`, cấu hình được qua file `.env`) làm đối tượng kiểm thử ranh giới trong [`starter-code/prompt_prototype.py`](starter-code/prompt_prototype.py).
 
 ---
 

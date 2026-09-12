@@ -12,8 +12,13 @@ Kien truc 3 lop (defense-in-depth) cho ranh gioi van hanh:
 
 Chay:
     pip install -r requirements.txt
-    export GEMINI_API_KEY="..."      # Windows PowerShell: $env:GEMINI_API_KEY="..."
+    cp .env.example .env        # roi dan GEMINI_API_KEY that vao file .env
     python starter-code/prompt_prototype.py
+
+API key duoc doc theo thu tu uu tien:
+    1. Bien moi truong da set san trong shell (GEMINI_API_KEY / GOOGLE_API_KEY)
+    2. File .env o thu muc goc du an hoac canh file nay
+File .env da nam trong .gitignore nen khong bao gio bi push len GitHub.
 
 Neu khong co API key hoac API loi, script tu dong chuyen sang FALLBACK tat dinh
 (dung template rule-based) - dung dung co che Fallback da mo ta trong
@@ -25,6 +30,7 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # Console tren Windows mac dinh la cp1252 -> phan hoi tieng Viet co dau se lam crash print().
@@ -37,8 +43,103 @@ for _stream_name in ("stdout", "stderr"):
         if _stream is not None and hasattr(_stream, "buffer"):
             setattr(sys, _stream_name, io.TextIOWrapper(_stream.buffer, encoding="utf-8", errors="replace"))
 
-# Standard Model Identifier
-GEMINI_MODEL = "gemini-2.5-flash"
+
+# ===========================================================================
+# Nap API key tu file .env (khong dua key vao source code)
+# ===========================================================================
+
+_HERE = Path(__file__).resolve().parent
+
+
+def _env_file_candidates() -> List[Path]:
+    """Cac vi tri co the chua file .env, theo thu tu uu tien, da khu trung lap."""
+    raw = [_HERE / ".env", _HERE.parent / ".env", Path.cwd() / ".env"]
+    seen, out = set(), []
+    for path in raw:
+        key = str(path).lower()
+        if key not in seen:
+            seen.add(key)
+            out.append(path)
+    return out
+
+
+def load_env_files() -> List[str]:
+    """
+    Nap bien moi truong tu file .env.
+
+    Dung python-dotenv neu co; neu chua cai thi dung parser toi gian tu viet
+    de script khong phu thuoc them thu vien nao. Bien da ton tai trong shell
+    LUON duoc uu tien, file .env khong ghi de len no.
+    """
+    loaded: List[str] = []
+    paths = [p for p in _env_file_candidates() if p.is_file()]
+    if not paths:
+        return loaded
+
+    try:
+        from dotenv import load_dotenv
+
+        for path in paths:
+            load_dotenv(path, override=False)
+            loaded.append(str(path))
+        return loaded
+    except ImportError:
+        pass
+
+    for path in paths:
+        try:
+            content = path.read_text(encoding="utf-8")
+        except Exception:
+            continue
+        for line in content.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            name, _, value = line.partition("=")
+            name = name.strip()
+            if name.startswith("export "):
+                name = name[len("export "):].strip()
+            value = value.split(" #", 1)[0].strip().strip('"').strip("'")
+            if name:
+                os.environ.setdefault(name, value)
+        loaded.append(str(path))
+    return loaded
+
+
+ENV_FILES_LOADED = load_env_files()
+
+
+def get_api_key() -> str:
+    """Tra ve API key dau tien tim duoc, chuoi rong neu chua cau hinh."""
+    return (os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or "").strip()
+
+
+# ===========================================================================
+# Model Identifier
+# ===========================================================================
+# Dat GEMINI_MODEL trong file .env de doi model chi bang mot dong, vi du:
+#     GEMINI_MODEL=gemini-3.8-flash
+# Neu model uu tien chua kha dung tren API key cua ban, script tu dong thu
+# lan luot cac model con lai trong danh sach duoi day.
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
+
+GEMINI_MODEL_CANDIDATES: List[str] = []
+for _candidate in (
+    GEMINI_MODEL,          # model do nguoi dung chon (hoac mac dinh flash-lite)
+    "gemini-3.8-flash",    # flash the he 3.x, manh hon lite
+    "gemini-flash-latest", # alias luon tro toi ban flash moi nhat
+    "gemini-2.5-flash",    # model chuan cua Lab 02, gia nhu cac ban tren deu loi
+):
+    if _candidate and _candidate not in GEMINI_MODEL_CANDIDATES:
+        GEMINI_MODEL_CANDIDATES.append(_candidate)
+
+# Model dau tien goi thanh cong se duoc ghi nho de cac lan sau khong phai do lai.
+_RESOLVED_MODEL: Optional[str] = None
+
+# Neu API hoan toan khong dung duoc (key sai, het quota, mat mang) thi tat han
+# viec goi API cho phan con lai cua phien, tranh lap lai hang chuc request loi
+# va lam phien kiem thu vuot qua gioi han thoi gian.
+_API_DISABLED = False
 
 # Hang so ranh gioi van hanh - dung chung cho prompt lan lop guard
 DRAFT_TAG = "[DRAFT_ONLY]"
@@ -181,61 +282,99 @@ def deterministic_draft(user_input: str) -> str:
 # Lop 1 - Goi Gemini 2.5 Flash
 # ===========================================================================
 
+def _models_to_try() -> List[str]:
+    """Model da goi thanh cong truoc do (neu co), nguoc lai la ca danh sach ung vien."""
+    return [_RESOLVED_MODEL] if _RESOLVED_MODEL else GEMINI_MODEL_CANDIDATES
+
+
+def _call_new_sdk(api_key: str, user_input: str) -> Optional[str]:
+    """Goi qua SDK moi 'google-genai'. Tra ve None neu khong dung duoc."""
+    global _RESOLVED_MODEL
+
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=API_TIMEOUT_SECONDS * 1000),
+    )
+    config = types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT,
+        temperature=0.0,
+        max_output_tokens=700,
+    )
+    for model_name in _models_to_try():
+        try:
+            response = client.models.generate_content(
+                model=model_name, contents=user_input, config=config
+            )
+            text = (getattr(response, "text", "") or "").strip()
+            if text:
+                if _RESOLVED_MODEL != model_name:
+                    _RESOLVED_MODEL = model_name
+                    print(f"   [info] Dang dung model: {model_name}")
+                return text
+        except Exception:
+            print(f"   [warn] Model '{model_name}' khong goi duoc -> thu model ke tiep")
+    return None
+
+
+def _call_legacy_sdk(api_key: str, user_input: str) -> Optional[str]:
+    """Goi qua SDK cu 'google-generativeai'. Tra ve None neu khong dung duoc."""
+    global _RESOLVED_MODEL
+
+    import google.generativeai as generativeai
+
+    generativeai.configure(api_key=api_key)
+    for model_name in _models_to_try():
+        try:
+            model = generativeai.GenerativeModel(
+                model_name=model_name, system_instruction=SYSTEM_PROMPT
+            )
+            response = model.generate_content(
+                user_input, request_options={"timeout": API_TIMEOUT_SECONDS}
+            )
+            text = (getattr(response, "text", "") or "").strip()
+            if text:
+                if _RESOLVED_MODEL != model_name:
+                    _RESOLVED_MODEL = model_name
+                    print(f"   [info] Dang dung model: {model_name} (SDK cu)")
+                return text
+        except Exception:
+            print(f"   [warn] Model '{model_name}' khong goi duoc -> thu model ke tiep")
+    return None
+
+
 def evaluate_prompt(user_input: str) -> str:
     """
-    Goi Gemini 2.5 API voi SYSTEM_PROMPT va user_input, tra ve raw response text.
+    Goi Gemini API voi SYSTEM_PROMPT va user_input, tra ve raw response text.
 
     Uu tien SDK moi 'google-genai' (google.genai), tu dong lui ve SDK cu
     'google-generativeai', va cuoi cung lui ve fallback tat dinh neu ca hai
-    deu khong dung duoc. Ham nay KHONG raise - loi mang khong duoc phep lam
-    sap toan bo phien kiem thu ranh gioi.
+    deu khong dung duoc. Trong moi SDK lai thu lan luot cac model trong
+    GEMINI_MODEL_CANDIDATES cho toi khi co model chay duoc.
+
+    Ham nay KHONG raise - loi mang hay model khong ton tai khong duoc phep
+    lam sap toan bo phien kiem thu ranh gioi.
     """
-    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    if not api_key:
+    global _API_DISABLED
+
+    api_key = get_api_key()
+    if not api_key or _API_DISABLED:
         return deterministic_draft(user_input)
 
-    # --- SDK moi: google-genai ---
-    try:
-        from google import genai
-        from google.genai import types
+    for caller, label in ((_call_new_sdk, "google-genai"), (_call_legacy_sdk, "google-generativeai")):
+        try:
+            text = caller(api_key, user_input)
+            if text:
+                return text
+        except ImportError:
+            print(f"   [warn] Chua cai SDK {label} (pip install -r requirements.txt)")
+        except Exception:
+            print(f"   [warn] SDK {label} gap su co khi khoi tao")
 
-        client = genai.Client(
-            api_key=api_key,
-            http_options=types.HttpOptions(timeout=API_TIMEOUT_SECONDS * 1000),
-        )
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=user_input,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.0,
-                max_output_tokens=700,
-            ),
-        )
-        text = (response.text or "").strip()
-        if text:
-            return text
-    except Exception:
-        print("   [warn] SDK google-genai khong dung duoc -> thu SDK google-generativeai")
-
-    # --- SDK cu: google-generativeai ---
-    try:
-        import google.generativeai as generativeai
-
-        generativeai.configure(api_key=api_key)
-        model = generativeai.GenerativeModel(
-            model_name=GEMINI_MODEL,
-            system_instruction=SYSTEM_PROMPT,
-        )
-        response = model.generate_content(
-            user_input,
-            request_options={"timeout": API_TIMEOUT_SECONDS},
-        )
-        text = (response.text or "").strip()
-        if text:
-            return text
-    except Exception:
-        print("   [warn] SDK google-generativeai khong dung duoc -> dung fallback tat dinh")
+    _API_DISABLED = True
+    print("   [warn] Khong goi duoc Gemini API -> chuyen han sang fallback tat dinh cho ca phien")
 
     return deterministic_draft(user_input)
 
@@ -371,19 +510,22 @@ ADVERSARIAL_TESTS: List[Dict[str, Any]] = [
 
 def run_boundary_suite() -> int:
     """Chay toan bo adversarial suite. Tra ve so check khong dat."""
-    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    mode = "LIVE - Gemini 2.5 Flash" if api_key else "OFFLINE - fallback tat dinh (chua set GEMINI_API_KEY)"
+    api_key = get_api_key()
+    mode = "LIVE - goi Gemini API that" if api_key else "OFFLINE - fallback tat dinh (chua co API key)"
 
     print("\033[94m==================================================")
     print("Vin Smart Future - Programmatic Boundary Stress-Testing")
-    print("Standard Model: Google Gemini 2.5 Flash")
-    print(f"Che do chay: {mode}")
+    print(f"Model uu tien : {GEMINI_MODEL}")
+    print(f"Model du phong: {', '.join(GEMINI_MODEL_CANDIDATES[1:]) or '(khong co)'}")
+    print(f"Che do chay   : {mode}")
+    if ENV_FILES_LOADED:
+        print(f"Nguon .env    : {', '.join(ENV_FILES_LOADED)}")
     print("==================================================\033[0m\n")
 
     if not api_key:
-        print("\033[93m[Note] Chua co GEMINI_API_KEY. Script chay o che do OFFLINE: lop guard va")
-        print("       template rule-based van duoc kiem thu day du. De goi API that, set bien")
-        print("       moi truong GEMINI_API_KEY roi chay lai.\033[0m\n")
+        print("\033[93m[Note] Chua co API key. Script chay o che do OFFLINE: lop guard va template")
+        print("       rule-based van duoc kiem thu day du. De goi API that, tao file .env o thu muc")
+        print("       goc du an (copy tu .env.example) va dan GEMINI_API_KEY vao, roi chay lai.\033[0m\n")
 
     total_not_ok = 0
 
@@ -398,7 +540,9 @@ def run_boundary_suite() -> int:
         print(f"\033[92mModel Response (sau lop guard):\033[0m\n{final_output}")
 
         # Audit trung thuc: phan hoi goc co tu tuan thu hay phai nho lop guard cuong che?
-        source = "Gemini 2.5 Flash" if api_key else "fallback tat dinh (khong goi LLM)"
+        # _RESOLVED_MODEL chi duoc gan khi thuc su co mot lan goi API thanh cong,
+        # nen day la nguon that cua ban nhap vua in ra - khong phai model du dinh goi.
+        source = _RESOLVED_MODEL or "fallback tat dinh (khong goi LLM)"
         if llm_violations:
             print(f"\033[91m[Boundary Audit] Phan hoi goc tu {source} VI PHAM - lop guard da cuong che:\033[0m")
             for item in llm_violations:
