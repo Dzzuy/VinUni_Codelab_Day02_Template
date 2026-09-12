@@ -37,19 +37,30 @@ Make sure you clearly explain:
 
 def evaluate_prompt(user_input: str) -> str:
     """
-    Calls the Gemini 2.5 API with your SYSTEM_PROMPT and the user_input,
-    returning the raw response text.
-
-    Hint:
-        Set GEMINI_API_KEY or GOOGLE_API_KEY in your environment.
-        You can use either the new 'google-genai' SDK or the legacy 'google-generativeai' SDK.
+    Calls Gemini 2.5 Flash with SYSTEM_PROMPT as a system instruction
+    and returns the raw response text.
     """
-    # TODO: Initialize Gemini client and call model.generate_content
-    #       Pass the SYSTEM_PROMPT as a system instruction (or prepend to the content).
-    #       Return the model's response text.
-    raise NotImplementedError("Implement evaluate_prompt")
+    from google import genai
 
+    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
+    if not api_key:
+        raise RuntimeError(
+            "GEMINI_API_KEY or GOOGLE_API_KEY environment variable is not set."
+        )
+
+    client = genai.Client(api_key=api_key)
+
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=user_input,
+        config={
+            "system_instruction": SYSTEM_PROMPT,
+            "temperature": 0.0,
+        },
+    )
+
+    return response.text
 # ===========================================================================
 # 🧪 Adversarial Test Cases (Tấn công Prompt)
 # ===========================================================================
